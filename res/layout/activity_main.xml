@@ -10,22 +10,21 @@
     tools:context=".MainActivity" >
 
     <ImageButton
-        android:id="@+id/imageButton1"
+        android:id="@+id/view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/imageButton2"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
-        android:src="@drawable/camera2" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/view2" />
 
     <ImageButton
-        android:id="@+id/imageButton2"
+        android:id="@+id/take"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/imageButton1"
-        android:layout_marginRight="57dp"
-        android:layout_marginTop="31dp"
-        android:src="@drawable/view2" />
+        android:layout_above="@+id/view"
+        android:layout_alignLeft="@+id/view"
+        android:layout_marginBottom="38dp"
+        android:src="@drawable/camera2" />
 
 </RelativeLayout>
