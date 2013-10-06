@@ -4,5 +4,8 @@
     <string name="app_name">getAWAYcam</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="nonstandard">This is not your standard camera app...</string>
+    <string name="takepics">Take pictures</string>
+    <string name="viewpics">to get nearby pictures taken by others.</string>
 
 </resources>
