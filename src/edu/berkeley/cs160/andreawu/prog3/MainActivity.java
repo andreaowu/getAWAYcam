@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -49,6 +50,8 @@ public class MainActivity extends Activity {
 	private ArrayList<PictureData> picData;
 	protected static final int TAKE_PHOTO_CODE = 0;
 	private ArrayList<Bitmap> pictures;
+	private LocationManager locationManager;
+	private MyLocationListener locationListener;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +62,11 @@ public class MainActivity extends Activity {
 		
 		picData = new ArrayList<PictureData>();
 		pictures = new ArrayList<Bitmap>();
+		
+		// Get location
+	    locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+	    locationListener = new MyLocationListener();
+	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
 		
 		addListenerOnButton();
 	}
@@ -78,22 +86,13 @@ public class MainActivity extends Activity {
 			Bitmap photo = (Bitmap) data.getExtras().get("data");
 			pictures.add(photo);
 		}
-		
-		Location loc = getLocation();
+
+		Location loc = locationListener.getLocation();
 		double lat = loc.getLatitude();
 		double lon = loc.getLongitude();
 		picData.add(new PictureData(new Date(), lat, lon));
 		sendHTTPRequest(lat, lon);
 		
-	}
-	
-	private Location getLocation() {
-	    // Get the location manager
-	    LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-	    Criteria criteria = new Criteria();
-	    String bestProvider = locationManager.getBestProvider(criteria, false);
-	    System.out.println("bestProvider: " + bestProvider);
-	    return locationManager.getLastKnownLocation(bestProvider);
 	}
 	
 	private void sendHTTPRequest(double lat, double lon) {
