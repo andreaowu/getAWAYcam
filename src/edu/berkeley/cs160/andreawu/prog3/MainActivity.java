@@ -2,8 +2,10 @@ package edu.berkeley.cs160.andreawu.prog3;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import android.view.View.OnTouchListener;
 import org.apache.http.HttpResponse;
@@ -13,10 +15,12 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.widget.ImageButton;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.location.Criteria;
 import android.location.Location;
@@ -33,6 +37,7 @@ import android.view.View.OnClickListener;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.Menu;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -40,12 +45,10 @@ public class MainActivity extends Activity {
 	
 	private ImageButton view;
 	private ImageButton take;
-	private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
-	private Uri fileUri;
-	public static final int MEDIA_TYPE_IMAGE = 1;
 	public RelativeLayout layout;
-	private Camera cam;
-	private CameraPreview camPrev;
+	private ArrayList<PictureData> picData;
+	protected static final int TAKE_PHOTO_CODE = 0;
+	private ArrayList<Bitmap> pictures;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,9 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		layout = (RelativeLayout) findViewById(R.id.rl);
+		
+		picData = new ArrayList<PictureData>();
+		pictures = new ArrayList<Bitmap>();
 		
 		addListenerOnButton();
 	}
@@ -66,29 +72,27 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) { // what happens when take picture
-	    if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-	        if (resultCode == RESULT_OK) {
-	            // Image captured and saved to fileUri specified in the Intent
-	            Toast.makeText(this, "Image saved to:\n" +
-	                     data.getData(), Toast.LENGTH_LONG).show();
-
-	        } else if (resultCode == RESULT_CANCELED) {
-	            // User cancelled the image capture
-	        } else {
-	            // Image capture failed, advise user
-	        }
-	    }
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if (requestCode == TAKE_PHOTO_CODE) {
+			Bitmap photo = (Bitmap) data.getExtras().get("data");
+			pictures.add(photo);
+		}
+		
 		Location loc = getLocation();
-		sendHTTPRequest(loc.getLatitude(), loc.getLongitude());
+		double lat = loc.getLatitude();
+		double lon = loc.getLongitude();
+		picData.add(new PictureData(new Date(), lat, lon));
+		sendHTTPRequest(lat, lon);
 		
 	}
 	
 	private Location getLocation() {
 	    // Get the location manager
-	    LocationManager locationManager = (LocationManager) 
-	            getSystemService(LOCATION_SERVICE);
+	    LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 	    Criteria criteria = new Criteria();
 	    String bestProvider = locationManager.getBestProvider(criteria, false);
+	    System.out.println("bestProvider: " + bestProvider);
 	    return locationManager.getLastKnownLocation(bestProvider);
 	}
 	
@@ -104,7 +108,7 @@ public class MainActivity extends Activity {
 				resp.getEntity().writeTo(out);
 				out.close();
 				String results = out.toString();
-				parseXML(results);
+				parseJSON(results);
 			}
 			
 		} catch (ClientProtocolException e) {
@@ -117,10 +121,15 @@ public class MainActivity extends Activity {
 		
 	}
 	
-	public void parseXML(String results) {
+	public void parseJSON(String results) {
 		try {
 			JSONObject jsn = new JSONObject(results);
-			int id = jsn.getJSONObject("photo").getInt("id");
+			JSONArray photo = jsn.getJSONObject("photos").getJSONArray("photo");
+			String userId = photo.getString(0);
+			String photoId = photo.getString(1);
+			String url = "http://www.flickr.com/photos/" + userId + "/" + photoId;
+			
+			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -136,26 +145,13 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				
-				// Create a media file name
-			    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-			    File mediaFile = new File("IMG_" + timeStamp + ".jpg");
-			    try {
-			    	mediaFile.createNewFile();
-			    } catch (IOException e) {
-			    	Uri outputFileUri = Uri.fromFile(mediaFile);
-
-		            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE); 
-		            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
-
-		            startActivityForResult(cameraIntent, 0);
-			    }
+	            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE); 
+	            startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
 			}
 			
 		});
 		
 		view.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
