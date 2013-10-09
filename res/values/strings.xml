@@ -7,5 +7,6 @@
     <string name="nonstandard">This is not your standard camera app...</string>
     <string name="takepics">Take pictures</string>
     <string name="viewpics">to get nearby pictures taken by others.</string>
-
+    <string name="about">Welcome to your getAWAYcam! This camera application is not your everyday camera app. When you take a photo, another photo taken from around the same location will be showed to you instead of the photo you took. In fact, the pictures you take will only be viewable to you until you leave the place where you took them!</string>
+    
 </resources>
