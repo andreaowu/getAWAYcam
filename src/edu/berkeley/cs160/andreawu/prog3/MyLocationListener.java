@@ -11,7 +11,6 @@ public class MyLocationListener implements LocationListener {
 	@Override
 	public void onLocationChanged(Location loc) {
 		location = loc;
-		System.out.println("location changed");
 	}
 
 	@Override
