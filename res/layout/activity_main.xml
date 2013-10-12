@@ -29,14 +29,46 @@
 
     <TextView
         android:id="@+id/about"
-        android:layout_below="@+id/view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="75dp"
+        android:layout_below="@+id/view"
         android:layout_marginLeft="100dp"
         android:layout_marginRight="100dp"
+        android:layout_marginTop="75dp"
+        android:text="@string/about"
         android:textColor="#ffffff"
-        android:textSize="24px"
-        android:text="@string/about" />
+        android:textSize="24px" />
+    
+    <ImageView
+        android:id="@+id/display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible"
+        android:src="@drawable/view2" />
+
+    <GridLayout
+        android:id="@+id/gridLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+    </GridLayout>
+
+    <Button
+        android:id="@+id/okay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:textColor="#ffffff"
+        android:text="Save" />
+    
+	<Button
+        android:id="@+id/redo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/okay"
+        android:visibility="invisible"
+        android:textColor="#ffffff"
+        android:text="Retake" />
+    
 
 </RelativeLayout>
