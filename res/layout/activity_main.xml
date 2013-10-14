@@ -8,6 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context=".MainActivity" >
 
     <ImageButton
@@ -41,8 +42,8 @@
     
     <ImageView
         android:id="@+id/display"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:visibility="invisible"
         android:src="@drawable/view2" />
@@ -51,6 +52,11 @@
         android:id="@+id/gridLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
+         
+        <ImageButton
+            android:id="@+id/showPic"
+        	android:visibility="invisible" />
+        
     </GridLayout>
 
     <Button
@@ -69,6 +75,29 @@
         android:visibility="invisible"
         android:textColor="#ffffff"
         android:text="Retake" />
-    
+
+	<TextView
+	    android:id="@+id/note"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignLeft="@+id/display"
+	    android:layout_below="@+id/gridLayout1"
+	    android:textColor="#ffffff"
+	    android:layout_marginLeft="75dp"
+	    android:layout_marginTop="-10dp"
+	    android:visibility="invisible"
+	    android:text="You cancelled picture taking. What would you like to do now?" />
+	
+	<TextView
+	    android:id="@+id/noPics"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignLeft="@+id/display"
+	    android:layout_below="@+id/gridLayout1"
+	    android:textColor="#ffffff"
+	    android:layout_marginLeft="75dp"
+	    android:layout_marginTop="-10dp"
+	    android:visibility="invisible"
+	    android:text="No pictures to view" />
 
 </RelativeLayout>
