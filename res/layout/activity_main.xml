@@ -87,5 +87,17 @@
 	    android:layout_marginTop="-10dp"
 	    android:visibility="invisible"
 	    android:text="You cancelled picture taking. What would you like to do now?" />
+	
+	<TextView
+	    android:id="@+id/noPics"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignLeft="@+id/display"
+	    android:layout_below="@+id/gridLayout1"
+	    android:textColor="#ffffff"
+	    android:layout_marginLeft="75dp"
+	    android:layout_marginTop="-10dp"
+	    android:visibility="invisible"
+	    android:text="No pictures to view" />
 
 </RelativeLayout>

@@ -1,12 +1,13 @@
 package edu.berkeley.cs160.andreawu.prog3;
 
-// line 229
+// line 229 doesn't work
+// screen rotation
+// take twice
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -15,7 +16,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,10 +23,15 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -35,10 +40,10 @@ import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.view.Menu;
 import android.widget.RelativeLayout;
 
@@ -57,11 +62,14 @@ public class MainActivity extends Activity {
 	protected static final int TAKE_PHOTO_CODE = 0;
 	private ArrayList<Bitmap> takenPics;
 	private ArrayList<Bitmap> apiPics;
-	private GridLayout gl;
 	private LocationManager locationManager;
 	private MyLocationListener locationListener;
 	private ImageView imageView;
 	private Bitmap current;
+	private GridLayout gl;
+	private TextView note;
+	private TextView noPics;
+	private ArrayList<ImageButton> takenPicsButtons;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,11 +80,14 @@ public class MainActivity extends Activity {
 		layout = (RelativeLayout) findViewById(R.id.rl);
 		imageView = (ImageView) findViewById(R.id.display);
 		gl = (GridLayout) findViewById(R.id.gridLayout1);
+		note = (TextView) findViewById(R.id.note);
+		noPics = (TextView) findViewById(R.id.noPics);
 		
 		// Instantiate variables
 		picData = new ArrayList<PictureData>();
 		takenPics = new ArrayList<Bitmap>();
 		apiPics = new ArrayList<Bitmap>();
+		takenPicsButtons = new ArrayList<ImageButton>();
 		
 		// Get location
 	    locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -85,6 +96,9 @@ public class MainActivity extends Activity {
 		
 	    // Activate button listeners
 		addListenerOnButton();
+		
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		
 	}
 
 	@Override
@@ -104,6 +118,11 @@ public class MainActivity extends Activity {
 			imageView.setAlpha(0);
 			imageView.setVisibility(0);
 			current = null;
+			note.setVisibility(4);
+			noPics.setVisibility(4);
+			for (int i = 0; i < takenPicsButtons.size(); i++) {
+				takenPicsButtons.get(i).setVisibility(4);
+			}
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -111,9 +130,10 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) { // what happens when take picture
-		
+		super.onActivityResult(requestCode, resultCode, data);
+
 		// Save the taken picture in bitmap format
-		if (requestCode == TAKE_PHOTO_CODE) {
+		if (requestCode == TAKE_PHOTO_CODE && !data.equals(null)) {
 			Bitmap photo = (Bitmap) data.getExtras().get("data");
 			current = photo;
 			
@@ -129,6 +149,15 @@ public class MainActivity extends Activity {
 			
 			// Run a new task to serve HTTP backend requests
 			new MyTask(loc.getLatitude(), loc.getLongitude(), photo).execute("");
+		} else {
+			findViewById(R.id.take).setVisibility(0);
+			findViewById(R.id.view).setVisibility(0);
+			findViewById(R.id.about).setVisibility(0);
+			findViewById(R.id.rl).setVisibility(0);
+			imageView.setAlpha(0);
+			imageView.setVisibility(0);
+			current = null;
+			note.setVisibility(0);
 		}
 		
 	}
@@ -180,6 +209,7 @@ public class MainActivity extends Activity {
 					Bitmap theImageFromByteArray = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
 					return theImageFromByteArray;
 				}
+				System.out.println("nothing");
 			} catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -187,7 +217,6 @@ public class MainActivity extends Activity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -206,6 +235,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 	            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE); 
+	            cameraIntent.putExtra(MediaStore.EXTRA_SCREEN_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 	            startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
 			}
 		});
@@ -213,6 +243,7 @@ public class MainActivity extends Activity {
 		view.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				note.setVisibility(4);
 				take.setVisibility(4);
 				view.setVisibility(4);
 				findViewById(R.id.about).setVisibility(4);
@@ -222,15 +253,26 @@ public class MainActivity extends Activity {
 				double lat = loc.getLatitude();
 				double lon = loc.getLongitude();
 				
-				System.out.println("viewing..." + picData.size());
-				for (int i = 0; i < picData.size(); i++) {
-					System.out.println("picdata size in view: " + picData.size());
-					ImageButton b = (ImageButton) findViewById(R.id.showPic);
-					ImageButton c = b;
-					c.setImageBitmap(picData.get(i).getOriginalPic());
-					c.setVisibility(0);
-					System.out.println("original pic: " + picData.get(i).getOriginalPic());
-					gl.setVisibility(0);
+				if (picData.isEmpty()) {
+					noPics.setVisibility(0);
+				} else {
+					for (int i = 0; i < picData.size(); i++) {
+						PictureData pd = picData.get(i);
+						ImageButton b = (ImageButton) findViewById(R.id.showPic);
+						// if less than .1 miles away
+						if (Math.abs(pd.getLongitude() - lat) <= 0.0017 && (Math.abs(pd.getLatitude() - lon) <= 0.0014)) {
+							ImageButton d = b;
+							d.setMinimumHeight(pd.getOriginalPic().getHeight());
+							d.setMinimumWidth(pd.getOriginalPic().getWidth());
+							d.setBackgroundColor(Color.GRAY);
+							d.setVisibility(0);
+							takenPicsButtons.add(d);
+						}
+						ImageButton c = b;
+						c.setImageBitmap(picData.get(i).getOriginalPic());
+						c.setVisibility(0);
+						takenPicsButtons.add(c);
+					}
 				}
 			}
 		});
@@ -245,6 +287,7 @@ public class MainActivity extends Activity {
 				imageView.setVisibility(0);
 				takenPics.add(current);
 				current = null;
+				note.setVisibility(4);
 			}
 		});
 		
@@ -252,6 +295,7 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				note.setVisibility(4);
 				current = null;
 	            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE); 
 	            startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
@@ -286,7 +330,6 @@ public class MainActivity extends Activity {
 		public void onPostExecute(Bitmap photo) {
 			apiPics.add(photo);
 			picData.add(new PictureData(new Date(), latitude, longitude, originalPhoto, apiPhoto));
-			System.out.println("picData ope: " + picData.size());
 			
 			// Why doesn't this work here?
 //			imageView.setImageBitmap(photo);
