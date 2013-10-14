@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import android.widget.Button;
 import android.widget.GridLayout;
+import android.widget.GridLayout.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -67,6 +68,8 @@ public class MainActivity extends Activity {
 	private ImageView imageView;
 	private Bitmap current;
 	private GridLayout gl;
+	private int glWidth;
+	private int glHeight;
 	private TextView note;
 	private TextView noPics;
 	private ArrayList<ImageButton> takenPicsButtons;
@@ -94,6 +97,9 @@ public class MainActivity extends Activity {
 	    locationListener = new MyLocationListener();
 	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
 		
+	    glWidth = gl.getWidth();
+	    glHeight = gl.getHeight();
+	    
 	    // Activate button listeners
 		addListenerOnButton();
 		
@@ -252,26 +258,41 @@ public class MainActivity extends Activity {
 				Location loc = locationListener.getLocation();
 				double lat = loc.getLatitude();
 				double lon = loc.getLongitude();
+
+				GridLayout.LayoutParams params = new GridLayout.LayoutParams();
 				
+				int h = layout.getHeight()/3;
+				int w = layout.getWidth()/3;
 				if (picData.isEmpty()) {
 					noPics.setVisibility(0);
 				} else {
+					gl.removeAllViews();
 					for (int i = 0; i < picData.size(); i++) {
+						System.out.println("hi");
+						int column = (i % 3) * w;
+						int row = (i / 3) * h;
+						params.leftMargin = column;
+						params.topMargin = row;
 						PictureData pd = picData.get(i);
 						ImageButton b = (ImageButton) findViewById(R.id.showPic);
 						// if less than .1 miles away
-						if (Math.abs(pd.getLongitude() - lat) <= 0.0017 && (Math.abs(pd.getLatitude() - lon) <= 0.0014)) {
+						if (Math.abs(pd.getLatitude() - lat) <= 0.0017 && (Math.abs(pd.getLongitude() - lon) <= 0.0014)) {
 							ImageButton d = b;
 							d.setMinimumHeight(pd.getOriginalPic().getHeight());
 							d.setMinimumWidth(pd.getOriginalPic().getWidth());
 							d.setBackgroundColor(Color.GRAY);
 							d.setVisibility(0);
+							d.setLayoutParams(params);
+							gl.addView(d);
 							takenPicsButtons.add(d);
+						} else {
+							ImageButton c = b;
+							c.setImageBitmap(picData.get(i).getOriginalPic());
+							c.setLayoutParams(params);
+							c.setVisibility(0);
+							gl.addView(c);
+							takenPicsButtons.add(c);
 						}
-						ImageButton c = b;
-						c.setImageBitmap(picData.get(i).getOriginalPic());
-						c.setVisibility(0);
-						takenPicsButtons.add(c);
 					}
 				}
 			}
