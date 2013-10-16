@@ -97,8 +97,8 @@ public class MainActivity extends Activity {
 	    locationListener = new MyLocationListener();
 	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
 		
-	    glWidth = gl.getWidth();
-	    glHeight = gl.getHeight();
+	    glWidth = gl.getWidth()/3;
+	    glHeight = gl.getHeight()/3;
 	    
 	    // Activate button listeners
 		addListenerOnButton();
@@ -137,12 +137,12 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) { // what happens when take picture
 		super.onActivityResult(requestCode, resultCode, data);
-
+		System.out.println("picture took");
 		// Save the taken picture in bitmap format
 		if (requestCode == TAKE_PHOTO_CODE && !data.equals(null)) {
 			Bitmap photo = (Bitmap) data.getExtras().get("data");
 			current = photo;
-			
+			System.out.println("photo null? " + current.equals(null));
 			imageView.setImageBitmap(photo);
 			imageView.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -261,16 +261,14 @@ public class MainActivity extends Activity {
 
 				GridLayout.LayoutParams params = new GridLayout.LayoutParams();
 				
-				int h = layout.getHeight()/3;
-				int w = layout.getWidth()/3;
 				if (picData.isEmpty()) {
 					noPics.setVisibility(0);
 				} else {
 					gl.removeAllViews();
 					for (int i = 0; i < picData.size(); i++) {
 						System.out.println("hi");
-						int column = (i % 3) * w;
-						int row = (i / 3) * h;
+						int column = (i % 3) * glWidth;
+						int row = (i / 3) * glHeight;
 						params.leftMargin = column;
 						params.topMargin = row;
 						PictureData pd = picData.get(i);
@@ -278,6 +276,8 @@ public class MainActivity extends Activity {
 						// if less than .1 miles away
 						if (Math.abs(pd.getLatitude() - lat) <= 0.0017 && (Math.abs(pd.getLongitude() - lon) <= 0.0014)) {
 							ImageButton d = b;
+							System.out.println("orig pic null?" + (pd.getOriginalPic() == null));
+							System.out.println("orig pic null?" + pd.getOriginalPic().getHeight());
 							d.setMinimumHeight(pd.getOriginalPic().getHeight());
 							d.setMinimumWidth(pd.getOriginalPic().getWidth());
 							d.setBackgroundColor(Color.GRAY);
@@ -352,11 +352,14 @@ public class MainActivity extends Activity {
 			apiPics.add(photo);
 			picData.add(new PictureData(new Date(), latitude, longitude, originalPhoto, apiPhoto));
 			
+			// use InputStream
+			// then Drawable
+			
 			// Why doesn't this work here?
-//			imageView.setImageBitmap(photo);
-//			imageView.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
-//            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-//			imageView.setVisibility(0);
+			imageView.setImageBitmap(photo);
+			imageView.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
+            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+			imageView.setVisibility(0);
 			
 //			findViewById(R.id.take).setVisibility(4);
 //			findViewById(R.id.view).setVisibility(4);
