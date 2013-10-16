@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/view"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="30dp"
         android:src="@drawable/camera2" />
 
     <ImageButton
@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/take"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="30dp"
         android:src="@drawable/view2" />
 
     <TextView
@@ -35,7 +35,7 @@
         android:layout_below="@+id/view"
         android:layout_marginLeft="100dp"
         android:layout_marginRight="100dp"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="30dp"
         android:text="@string/about"
         android:textColor="#ffffff"
         android:textSize="24px" />
@@ -61,19 +61,27 @@
 
     <Button
         android:id="@+id/okay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
+        android:layout_width="50dp"
+        android:layout_height="20dp"
         android:textColor="#ffffff"
+        android:background="#8b8989"
+        android:layout_marginTop="400dp"
+        android:layout_marginLeft="50dp"
+        android:textSize="10dp"
+        android:visibility="invisible"
         android:text="Save" />
     
 	<Button
         android:id="@+id/redo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="20dp"
         android:layout_toRightOf="@+id/okay"
-        android:visibility="invisible"
         android:textColor="#ffffff"
+        android:background="#8b8989"
+        android:layout_marginTop="400dp"
+        android:layout_marginLeft="75dp"
+        android:textSize="10dp"
+        android:visibility="invisible"
         android:text="Retake" />
 
 	<TextView
@@ -99,5 +107,17 @@
 	    android:layout_marginTop="-10dp"
 	    android:visibility="invisible"
 	    android:text="No pictures to view" />
+	
+		<TextView
+	    android:id="@+id/waiting"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignLeft="@+id/display"
+	    android:layout_below="@+id/gridLayout1"
+	    android:textColor="#ffffff"
+	    android:layout_marginLeft="10dp"
+	    android:layout_marginTop="-10dp"
+	    android:visibility="invisible"
+	    android:text="Waiting for API response of a photo..." />
 
 </RelativeLayout>
