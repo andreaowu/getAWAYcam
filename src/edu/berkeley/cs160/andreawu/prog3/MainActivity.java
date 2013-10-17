@@ -87,6 +87,10 @@ public class MainActivity extends Activity {
 		note = (TextView) findViewById(R.id.note);
 		noPics = (TextView) findViewById(R.id.noPics);
 		waiting = (TextView) findViewById(R.id.waiting);
+		take = (ImageButton) findViewById(R.id.take);
+		view = (ImageButton) findViewById(R.id.view);
+		okay = (Button) findViewById(R.id.okay);
+		redo = (Button) findViewById(R.id.redo);
 		
 		// Instantiate variables
 		picData = new ArrayList<PictureData>();
@@ -141,7 +145,7 @@ public class MainActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 		System.out.println("picture took");
 		// Save the taken picture in bitmap format
-		if (requestCode == TAKE_PHOTO_CODE && !data.equals(null)) {
+		if (requestCode == TAKE_PHOTO_CODE && !data.equals(null) && resultCode == Activity.RESULT_OK) {
 			Bitmap photo = (Bitmap) data.getExtras().get("data");
 			current = photo;
 			
@@ -230,10 +234,6 @@ public class MainActivity extends Activity {
 	}
 	
 	public void addListenerOnButton() {
-		take = (ImageButton) findViewById(R.id.take);
-		view = (ImageButton) findViewById(R.id.view);
-		okay = (Button) findViewById(R.id.okay);
-		redo = (Button) findViewById(R.id.redo);
 		
 		take.setOnClickListener(new OnClickListener() {
 
@@ -252,31 +252,32 @@ public class MainActivity extends Activity {
 				take.setVisibility(4);
 				view.setVisibility(4);
 				findViewById(R.id.about).setVisibility(4);
-				
-				// Run the location listener to get the GPS location of the phone
+
+				// Run the location listener to get the GPS location of the
+				// phone
 				Location loc = locationListener.getLocation();
 				double lat = loc.getLatitude();
 				double lon = loc.getLongitude();
 
 				GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-				
+
+				ImageButton b = (ImageButton) findViewById(R.id.showPic);
+
+				int h = layout.getHeight() / 3;
+				int w = layout.getWidth() / 3;
 				if (picData.isEmpty()) {
 					noPics.setVisibility(0);
 				} else {
 					gl.removeAllViews();
 					for (int i = 0; i < picData.size(); i++) {
-						System.out.println("hi");
-						int column = (i % 3) * glWidth;
-						int row = (i / 3) * glHeight;
+						int column = (i % 3) * w;
+						int row = (i / 3) * h;
 						params.leftMargin = column;
 						params.topMargin = row;
 						PictureData pd = picData.get(i);
-						ImageButton b = (ImageButton) findViewById(R.id.showPic);
 						// if less than .1 miles away
 						if (Math.abs(pd.getLatitude() - lat) <= 0.0017 && (Math.abs(pd.getLongitude() - lon) <= 0.0014)) {
 							ImageButton d = b;
-							System.out.println("orig pic null?" + (pd.getOriginalPic() == null));
-							System.out.println("orig pic null?" + pd.getOriginalPic().getHeight());
 							d.setMinimumHeight(pd.getOriginalPic().getHeight());
 							d.setMinimumWidth(pd.getOriginalPic().getWidth());
 							d.setBackgroundColor(Color.GRAY);
@@ -301,17 +302,17 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				findViewById(R.id.take).setVisibility(0);
-				findViewById(R.id.view).setVisibility(0);
+				System.out.println("whaaaat?");
+				noPics.setVisibility(4);
+				okay.setVisibility(4);
+				redo.setVisibility(4);
+				take.setVisibility(0);
+				view.setVisibility(0);
 				findViewById(R.id.about).setVisibility(0);
-				findViewById(R.id.rl).setVisibility(0);
 				imageView.setAlpha(0);
 				imageView.setVisibility(0);
 				current = null;
 				note.setVisibility(4);
-				noPics.setVisibility(4);
-				okay.setVisibility(4);
-				redo.setVisibility(4);
 			}
 		});
 		
@@ -355,12 +356,13 @@ public class MainActivity extends Activity {
 			apiPics.add(photo);
 			picData.add(new PictureData(new Date(), latitude, longitude, originalPhoto, apiPhoto));
 			
-			// Why doesn't this work here?
+			// display the photo
 			imageView.setImageBitmap(photo);
 			imageView.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
 			imageView.setVisibility(0);
 			
+			// give option to save or retake
 			okay.setVisibility(0);
 			redo.setVisibility(0);
 			waiting.setVisibility(4);
