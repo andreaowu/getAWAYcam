@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -62,6 +63,13 @@ public class MainActivity extends Activity {
 	private MyLocationListener locationListener;
 	private ImageView imageView;
 	private Bitmap current;
+	private int glWidth;
+	private int glHeight;
+	private TextView note;
+	private TextView noPics;
+	private ArrayList<ImageButton> takenPicsButtons;
+	private TextView waiting;
+	private TextView about;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,11 +80,16 @@ public class MainActivity extends Activity {
 		layout = (RelativeLayout) findViewById(R.id.rl);
 		imageView = (ImageView) findViewById(R.id.display);
 		gl = (GridLayout) findViewById(R.id.gridLayout1);
+        note = (TextView) findViewById(R.id.note);
+        noPics = (TextView) findViewById(R.id.noPics);
+        waiting = (TextView) findViewById(R.id.waiting);
+        about = (TextView) findViewById(R.id.about);
 		
 		// Instantiate variables
 		picData = new ArrayList<PictureData>();
 		takenPics = new ArrayList<Bitmap>();
 		apiPics = new ArrayList<Bitmap>();
+        takenPicsButtons = new ArrayList<ImageButton>();
 		
 		// Get location
 	    locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -97,9 +110,9 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.home:
-			findViewById(R.id.take).setVisibility(0);
-			findViewById(R.id.view).setVisibility(0);
-			findViewById(R.id.about).setVisibility(0);
+			take.setVisibility(0);
+			view.setVisibility(0);
+			about.setVisibility(0);
 			findViewById(R.id.rl).setVisibility(0);
 			imageView.setAlpha(0);
 			imageView.setVisibility(0);
@@ -117,15 +130,13 @@ public class MainActivity extends Activity {
 			Bitmap photo = (Bitmap) data.getExtras().get("data");
 			current = photo;
 			
-			imageView.setImageBitmap(photo);
-			imageView.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
-            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-			imageView.setVisibility(0);
-			findViewById(R.id.okay).setVisibility(0);
-			findViewById(R.id.redo).setVisibility(0);
-			
 			// Run the location listener to get the GPS location of the phone
 			Location loc = locationListener.getLocation();
+			
+			take.setVisibility(4);
+			view.setVisibility(4);
+			about.setVisibility(4);
+			waiting.setVisibility(0);
 			
 			// Run a new task to serve HTTP backend requests
 			new MyTask(loc.getLatitude(), loc.getLongitude(), photo).execute("");
@@ -222,14 +233,11 @@ public class MainActivity extends Activity {
 				double lat = loc.getLatitude();
 				double lon = loc.getLongitude();
 				
-				System.out.println("viewing..." + picData.size());
 				for (int i = 0; i < picData.size(); i++) {
-					System.out.println("picdata size in view: " + picData.size());
 					ImageButton b = (ImageButton) findViewById(R.id.showPic);
 					ImageButton c = b;
-					c.setImageBitmap(picData.get(i).getOriginalPic());
+					c.setImageBitmap(picData.get(i).getApiPic());
 					c.setVisibility(0);
-					System.out.println("original pic: " + picData.get(i).getOriginalPic());
 					gl.setVisibility(0);
 				}
 			}
@@ -245,6 +253,10 @@ public class MainActivity extends Activity {
 				imageView.setVisibility(0);
 				takenPics.add(current);
 				current = null;
+				take.setVisibility(0);
+				view.setVisibility(0);
+				about.setVisibility(0);
+				waiting.setVisibility(4);
 			}
 		});
 		
@@ -286,17 +298,13 @@ public class MainActivity extends Activity {
 		public void onPostExecute(Bitmap photo) {
 			apiPics.add(photo);
 			picData.add(new PictureData(new Date(), latitude, longitude, originalPhoto, apiPhoto));
-			System.out.println("picData ope: " + picData.size());
 			
-			// Why doesn't this work here?
-//			imageView.setImageBitmap(photo);
-//			imageView.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
-//            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-//			imageView.setVisibility(0);
-			
-//			findViewById(R.id.take).setVisibility(4);
-//			findViewById(R.id.view).setVisibility(4);
-//			findViewById(R.id.about).setVisibility(4);
+			imageView.setImageBitmap(photo);
+			imageView.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
+            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+			imageView.setVisibility(0);
+			findViewById(R.id.okay).setVisibility(0);
+			findViewById(R.id.redo).setVisibility(0);
 		}
 	}
 	
