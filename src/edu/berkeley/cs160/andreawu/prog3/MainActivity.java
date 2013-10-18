@@ -236,7 +236,8 @@ public class MainActivity extends Activity {
 				for (int i = 0; i < picData.size(); i++) {
 					ImageButton b = (ImageButton) findViewById(R.id.showPic);
 					ImageButton c = b;
-					c.setImageBitmap(picData.get(i).getApiPic());
+					Bitmap scaled = Bitmap.createScaledBitmap(picData.get(i).getApiPic(), 150, 150, true);
+	                c.setImageBitmap(scaled);
 					c.setVisibility(0);
 					gl.setVisibility(0);
 				}
