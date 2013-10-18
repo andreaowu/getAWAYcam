@@ -1,12 +1,9 @@
 package edu.berkeley.cs160.andreawu.prog3;
 
-// line 229
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -15,7 +12,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,8 +22,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -36,7 +30,6 @@ import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.app.Activity;
 import android.content.Intent;
@@ -236,7 +229,8 @@ public class MainActivity extends Activity {
 				for (int i = 0; i < picData.size(); i++) {
 					ImageButton b = (ImageButton) findViewById(R.id.showPic);
 					ImageButton c = b;
-					c.setImageBitmap(picData.get(i).getApiPic());
+					Bitmap scaled = Bitmap.createScaledBitmap(picData.get(i).getApiPic(), 150, 150, true);
+	                c.setImageBitmap(scaled);
 					c.setVisibility(0);
 					gl.setVisibility(0);
 				}
