@@ -1,12 +1,9 @@
 package edu.berkeley.cs160.andreawu.prog3;
 
-// line 229
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -15,7 +12,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,17 +22,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.Color;
+import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.app.Activity;
 import android.content.Intent;
@@ -63,13 +59,14 @@ public class MainActivity extends Activity {
 	private MyLocationListener locationListener;
 	private ImageView imageView;
 	private Bitmap current;
-	private int glWidth;
-	private int glHeight;
+	private int screenWidth;
+	private int screenHeight;
 	private TextView note;
 	private TextView noPics;
 	private ArrayList<ImageButton> takenPicsButtons;
 	private TextView waiting;
 	private TextView about;
+	private Button viewAll;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,12 +81,20 @@ public class MainActivity extends Activity {
         noPics = (TextView) findViewById(R.id.noPics);
         waiting = (TextView) findViewById(R.id.waiting);
         about = (TextView) findViewById(R.id.about);
+        viewAll = (Button) findViewById(R.id.goBack);
 		
 		// Instantiate variables
 		picData = new ArrayList<PictureData>();
 		takenPics = new ArrayList<Bitmap>();
 		apiPics = new ArrayList<Bitmap>();
         takenPicsButtons = new ArrayList<ImageButton>();
+        
+        // Get screen height and width
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        screenWidth = size.x;
+        screenHeight = size.y;
 		
 		// Get location
 	    locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -110,6 +115,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.home:
+			layout.setBackgroundColor(Color.BLACK);
 			take.setVisibility(0);
 			view.setVisibility(0);
 			about.setVisibility(0);
@@ -117,6 +123,10 @@ public class MainActivity extends Activity {
 			imageView.setAlpha(0);
 			imageView.setVisibility(0);
 			current = null;
+			for (int i = 0; i < takenPicsButtons.size(); i++) {
+				takenPicsButtons.get(i).setVisibility(4);
+			}
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -233,13 +243,41 @@ public class MainActivity extends Activity {
 				double lat = loc.getLatitude();
 				double lon = loc.getLongitude();
 				
-				for (int i = 0; i < picData.size(); i++) {
-					ImageButton b = (ImageButton) findViewById(R.id.showPic);
-					ImageButton c = b;
-					Bitmap scaled = Bitmap.createScaledBitmap(picData.get(i).getApiPic(), 150, 150, true);
-	                c.setImageBitmap(scaled);
-					c.setVisibility(0);
-					gl.setVisibility(0);
+				if (picData.isEmpty()) {
+					noPics.setVisibility(0);
+				} else {
+					for (int i = 0; i < picData.size(); i++) {
+						final PictureData pd = picData.get(i);
+						ImageButton b = (ImageButton) findViewById(R.id.showPic);
+						// if less than .1 miles away
+						if (Math.abs(pd.getLongitude() - lon) <= 0.0017 && (Math.abs(pd.getLatitude() - lat) <= 0.0014)) {
+							ImageButton d = b;
+							d.setBackgroundColor(Color.GRAY);
+							d.setMinimumHeight(150);
+							d.setMinimumWidth(150);
+							d.setVisibility(0);
+							d.setOnClickListener(new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									layout.setBackgroundColor(Color.GRAY);
+								}
+							});
+							takenPicsButtons.add(d);
+						} else {
+							final ImageButton c = b;
+							Bitmap scaled = Bitmap.createScaledBitmap(pd.getApiPic(), 150, 150, true);
+			                c.setImageBitmap(scaled);
+							c.setVisibility(0);
+							c.setOnClickListener(new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									Bitmap scale = Bitmap.createScaledBitmap(pd.getApiPic(), screenWidth, screenHeight, true);
+									c.setImageBitmap(scale);
+								}
+							});
+							takenPicsButtons.add(c);
+						}
+					}
 				}
 			}
 		});
@@ -269,6 +307,15 @@ public class MainActivity extends Activity {
 	            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE); 
 	            startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
 			}
+		});
+		
+		viewAll.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+			}
+			
 		});
 	}
 
@@ -306,6 +353,8 @@ public class MainActivity extends Activity {
 			imageView.setVisibility(0);
 			findViewById(R.id.okay).setVisibility(0);
 			findViewById(R.id.redo).setVisibility(0);
+			
+			waiting.setVisibility(4);
 		}
 	}
 	
