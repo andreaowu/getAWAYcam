@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.view.Menu;
 import android.widget.RelativeLayout;
 
+// path: src/edu/berkeley/cs160/andreawu/prog3/MainActivity.java
 public class MainActivity extends Activity {
 	
 	/* Button for viewing pictures */
@@ -123,6 +124,8 @@ public class MainActivity extends Activity {
 			imageView.setAlpha(0);
 			imageView.setVisibility(0);
 			current = null;
+			okay.setVisibility(4);
+			redo.setVisibility(4);
 			for (int i = 0; i < takenPicsButtons.size(); i++) {
 				takenPicsButtons.get(i).setVisibility(4);
 			}
@@ -155,7 +158,9 @@ public class MainActivity extends Activity {
 	}
 	
 	private Bitmap sendHTTPRequest(double lat, double lon) {
-		String url = "http://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=fc9d891092bbd266d5f6f1c4a0ce7c81&lat=" + lat + "&lon=" + lon + "&radius=0.10&radius_units=mi&per_page=1&page=1&format=json&nojsoncallback=1";
+		
+		// URL: http://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=fc9d891092bbd266d5f6f1c4a0ce7c81&lat=21.3114&lon=157.7964&radius=0.25&radius_units=mi&per_page=1&page=1&format=json&nojsoncallback=1
+		String url = "http://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=fc9d891092bbd266d5f6f1c4a0ce7c81&lat=" + lat + "&lon=" + lon + "&radius=0.25&radius_units=mi&per_page=1&page=1&format=json&nojsoncallback=1";
 		HttpClient client = new DefaultHttpClient();
 		HttpResponse resp;
 		try {
@@ -166,6 +171,7 @@ public class MainActivity extends Activity {
 				resp.getEntity().writeTo(out);
 				out.close();
 				String results = out.toString();
+				System.out.println("results: " + results);
 				Bitmap b = parseJSON(results);
 				return b;
 			}
@@ -175,7 +181,6 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 		}
 		return null;
-		
 	}
 	
 	public Bitmap parseJSON(String results) {
@@ -265,13 +270,13 @@ public class MainActivity extends Activity {
 							takenPicsButtons.add(d);
 						} else {
 							final ImageButton c = b;
-							Bitmap scaled = Bitmap.createScaledBitmap(pd.getApiPic(), 150, 150, true);
+							Bitmap scaled = Bitmap.createScaledBitmap(pd.getOriginalPic(), 150, 150, true);
 			                c.setImageBitmap(scaled);
 							c.setVisibility(0);
 							c.setOnClickListener(new OnClickListener() {
 								@Override
 								public void onClick(View v) {
-									Bitmap scale = Bitmap.createScaledBitmap(pd.getApiPic(), screenWidth, screenHeight, true);
+									Bitmap scale = Bitmap.createScaledBitmap(pd.getOriginalPic(), screenWidth, screenHeight, true);
 									c.setImageBitmap(scale);
 								}
 							});
@@ -288,8 +293,7 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				okay.setVisibility(4);
 				redo.setVisibility(4);
-				imageView.setAlpha(0);
-				imageView.setVisibility(0);
+				imageView.setImageBitmap(null);
 				takenPics.add(current);
 				current = null;
 				take.setVisibility(0);
@@ -337,7 +341,6 @@ public class MainActivity extends Activity {
 			apiPhoto = sendHTTPRequest(latitude, longitude);
 			return apiPhoto;
 		}
-		
 		@Override
 		public void onPreExecute() {
 		}
@@ -346,7 +349,6 @@ public class MainActivity extends Activity {
 		public void onPostExecute(Bitmap photo) {
 			apiPics.add(photo);
 			picData.add(new PictureData(new Date(), latitude, longitude, originalPhoto, apiPhoto));
-			
 			imageView.setImageBitmap(photo);
 			imageView.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -355,6 +357,7 @@ public class MainActivity extends Activity {
 			findViewById(R.id.redo).setVisibility(0);
 			
 			waiting.setVisibility(4);
+			imageView.invalidate();
 		}
 	}
 	
