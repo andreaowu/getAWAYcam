@@ -116,19 +116,30 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.home:
+			// Reset the layout to only have View and Take picture icons
 			layout.setBackgroundColor(Color.BLACK);
 			take.setVisibility(0);
 			view.setVisibility(0);
-			about.setVisibility(0);
+			about.setVisibility(4);
 			findViewById(R.id.rl).setVisibility(0);
 			imageView.setAlpha(0);
 			imageView.setVisibility(0);
 			current = null;
 			okay.setVisibility(4);
 			redo.setVisibility(4);
+			noPics.setVisibility(4);
 			for (int i = 0; i < takenPicsButtons.size(); i++) {
 				takenPicsButtons.get(i).setVisibility(4);
 			}
+			return true;
+		case R.id.aboutApp:
+			// Get rid of all pictures on screen except for the "About Application" string
+			take.setVisibility(4);
+			view.setVisibility(4);
+			for (int i = 0; i < takenPicsButtons.size(); i++) {
+				takenPicsButtons.get(i).setVisibility(4);
+			}
+			about.setVisibility(0);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -146,6 +157,7 @@ public class MainActivity extends Activity {
 			// Run the location listener to get the GPS location of the phone
 			Location loc = locationListener.getLocation();
 			
+			// Setting pictures and labels to be visible appropriately
 			take.setVisibility(4);
 			view.setVisibility(4);
 			about.setVisibility(4);
@@ -248,12 +260,18 @@ public class MainActivity extends Activity {
 				double lat = loc.getLatitude();
 				double lon = loc.getLongitude();
 				
+				GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+				
 				if (picData.isEmpty()) {
 					noPics.setVisibility(0);
 				} else {
 					for (int i = 0; i < picData.size(); i++) {
 						final PictureData pd = picData.get(i);
 						ImageButton b = (ImageButton) findViewById(R.id.showPic);
+						int column = (i % 3) * screenWidth;
+                        int row = (i / 3) * screenHeight;
+                        params.leftMargin = column;
+                        params.topMargin = row;
 						// if less than .1 miles away
 						if (Math.abs(pd.getLongitude() - lon) <= 0.0017 && (Math.abs(pd.getLatitude() - lat) <= 0.0014)) {
 							ImageButton d = b;
@@ -261,6 +279,7 @@ public class MainActivity extends Activity {
 							d.setMinimumHeight(150);
 							d.setMinimumWidth(150);
 							d.setVisibility(0);
+							d.setLayoutParams(params);
 							d.setOnClickListener(new OnClickListener() {
 								@Override
 								public void onClick(View v) {
@@ -273,9 +292,11 @@ public class MainActivity extends Activity {
 							Bitmap scaled = Bitmap.createScaledBitmap(pd.getOriginalPic(), 150, 150, true);
 			                c.setImageBitmap(scaled);
 							c.setVisibility(0);
+							c.setLayoutParams(params);
 							c.setOnClickListener(new OnClickListener() {
 								@Override
 								public void onClick(View v) {
+									layout.setBackgroundColor(Color.BLACK);
 									Bitmap scale = Bitmap.createScaledBitmap(pd.getOriginalPic(), screenWidth, screenHeight, true);
 									c.setImageBitmap(scale);
 								}
@@ -298,7 +319,7 @@ public class MainActivity extends Activity {
 				current = null;
 				take.setVisibility(0);
 				view.setVisibility(0);
-				about.setVisibility(0);
+				about.setVisibility(4);
 				waiting.setVisibility(4);
 			}
 		});

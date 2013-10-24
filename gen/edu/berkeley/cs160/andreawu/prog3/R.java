@@ -30,11 +30,12 @@ public final class R {
     }
     public static final class id {
         public static final int about=0x7f080003;
+        public static final int aboutApp=0x7f08000e;
         public static final int action_settings=0x7f08000d;
         public static final int display=0x7f080004;
         public static final int goBack=0x7f080009;
         public static final int gridLayout1=0x7f080005;
-        public static final int home=0x7f08000e;
+        public static final int home=0x7f08000f;
         public static final int noPics=0x7f08000b;
         public static final int note=0x7f08000a;
         public static final int okay=0x7f080007;

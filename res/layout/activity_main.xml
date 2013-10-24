@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/view"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="50dp"
         android:src="@drawable/camera2" />
 
     <ImageButton
@@ -25,18 +25,18 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/take"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="50dp"
         android:src="@drawable/view2" />
 
     <TextView
         android:id="@+id/about"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/view"
-        android:layout_marginLeft="100dp"
-        android:layout_marginRight="100dp"
-        android:layout_marginTop="75dp"
+        android:layout_marginLeft="75dp"
+        android:layout_marginRight="75dp"
+        android:layout_marginTop="10dp"
         android:text="@string/about"
+        android:visibility="invisible"
         android:textColor="#ffffff"
         android:textSize="24px" />
     
