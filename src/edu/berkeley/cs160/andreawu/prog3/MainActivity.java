@@ -39,35 +39,42 @@ import android.content.Intent;
 import android.view.Menu;
 import android.widget.RelativeLayout;
 
-// path: src/edu/berkeley/cs160/andreawu/prog3/MainActivity.java
 public class MainActivity extends Activity {
 	
-	/* Button for viewing pictures */
+	/* Buttons for viewing pictures */
 	private ImageButton view;
 	/* Button for taking pictures */
 	private ImageButton take;
+	/* Button for saving the taken picture */
 	private Button okay;
+	/* Button for retaking the picture*/
 	private Button redo;
 	/* Layout of this activity */
 	public RelativeLayout layout;
 	/* List of picture data */
 	private ArrayList<PictureData> picData;
+	/* Photo taking code */
 	protected static final int TAKE_PHOTO_CODE = 0;
-	private ArrayList<Bitmap> takenPics;
-	private ArrayList<Bitmap> apiPics;
-	private GridLayout gl;
-	private LocationManager locationManager;
-	private MyLocationListener locationListener;
+	/* View for pictures */
 	private ImageView imageView;
-	private Bitmap current;
+	/* Screen width */
 	private int screenWidth;
+	/* Screen height */
 	private int screenHeight;
-	private TextView note;
-	private TextView noPics;
+	/* All the pictures that were taken */ 
 	private ArrayList<ImageButton> takenPicsButtons;
+	/* No pictures string showing */
+	private TextView noPics;
+	/* Waiting for API response to show up */
 	private TextView waiting;
+	/* About application string showing */
 	private TextView about;
-	private Button viewAll;
+	/* Current Bitmap stored */
+	private Bitmap current;
+	/* Used for getting GPS location */
+	private LocationManager locationManager;
+	/* The class for getting the location */
+	private MyLocationListener locationListener;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -77,17 +84,12 @@ public class MainActivity extends Activity {
 		// Get the layout
 		layout = (RelativeLayout) findViewById(R.id.rl);
 		imageView = (ImageView) findViewById(R.id.display);
-		gl = (GridLayout) findViewById(R.id.gridLayout1);
-        note = (TextView) findViewById(R.id.note);
         noPics = (TextView) findViewById(R.id.noPics);
         waiting = (TextView) findViewById(R.id.waiting);
         about = (TextView) findViewById(R.id.about);
-        viewAll = (Button) findViewById(R.id.goBack);
 		
 		// Instantiate variables
 		picData = new ArrayList<PictureData>();
-		takenPics = new ArrayList<Bitmap>();
-		apiPics = new ArrayList<Bitmap>();
         takenPicsButtons = new ArrayList<ImageButton>();
         
         // Get screen height and width
@@ -116,7 +118,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.home:
-			// Reset the layout to only have View and Take picture icons
+			// Set all the pictures back and all text invisible
 			layout.setBackgroundColor(Color.BLACK);
 			take.setVisibility(0);
 			view.setVisibility(0);
@@ -133,12 +135,9 @@ public class MainActivity extends Activity {
 			}
 			return true;
 		case R.id.aboutApp:
-			// Get rid of all pictures on screen except for the "About Application" string
+			// Make all pictures invisible but show the text
 			take.setVisibility(4);
 			view.setVisibility(4);
-			for (int i = 0; i < takenPicsButtons.size(); i++) {
-				takenPicsButtons.get(i).setVisibility(4);
-			}
 			about.setVisibility(0);
 			return true;
 		default:
@@ -157,7 +156,6 @@ public class MainActivity extends Activity {
 			// Run the location listener to get the GPS location of the phone
 			Location loc = locationListener.getLocation();
 			
-			// Setting pictures and labels to be visible appropriately
 			take.setVisibility(4);
 			view.setVisibility(4);
 			about.setVisibility(4);
@@ -169,9 +167,11 @@ public class MainActivity extends Activity {
 		
 	}
 	
+	/*
+	 * Send HTTP request to the Flickr API to get the parameters needed to get
+	 * the picture
+	 */
 	private Bitmap sendHTTPRequest(double lat, double lon) {
-		
-		// URL: http://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=fc9d891092bbd266d5f6f1c4a0ce7c81&lat=21.3114&lon=157.7964&radius=0.25&radius_units=mi&per_page=1&page=1&format=json&nojsoncallback=1
 		String url = "http://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=fc9d891092bbd266d5f6f1c4a0ce7c81&lat=" + lat + "&lon=" + lon + "&radius=0.25&radius_units=mi&per_page=1&page=1&format=json&nojsoncallback=1";
 		HttpClient client = new DefaultHttpClient();
 		HttpResponse resp;
@@ -183,7 +183,6 @@ public class MainActivity extends Activity {
 				resp.getEntity().writeTo(out);
 				out.close();
 				String results = out.toString();
-				System.out.println("results: " + results);
 				Bitmap b = parseJSON(results);
 				return b;
 			}
@@ -195,6 +194,10 @@ public class MainActivity extends Activity {
 		return null;
 	}
 	
+	/*
+	 * Parse the response from the first Flickr API call, then make a second
+	 * call to the API to get the actual picture back
+	 */
 	public Bitmap parseJSON(String results) {
 		try {
 			JSONObject jsn = new JSONObject(results);
@@ -233,6 +236,7 @@ public class MainActivity extends Activity {
 		return null;
 	}
 	
+	/* Takes care of what happens when each button is clicked */
 	public void addListenerOnButton() {
 		take = (ImageButton) findViewById(R.id.take);
 		view = (ImageButton) findViewById(R.id.view);
@@ -260,18 +264,12 @@ public class MainActivity extends Activity {
 				double lat = loc.getLatitude();
 				double lon = loc.getLongitude();
 				
-				GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-				
 				if (picData.isEmpty()) {
 					noPics.setVisibility(0);
 				} else {
 					for (int i = 0; i < picData.size(); i++) {
 						final PictureData pd = picData.get(i);
 						ImageButton b = (ImageButton) findViewById(R.id.showPic);
-						int column = (i % 3) * screenWidth;
-                        int row = (i / 3) * screenHeight;
-                        params.leftMargin = column;
-                        params.topMargin = row;
 						// if less than .1 miles away
 						if (Math.abs(pd.getLongitude() - lon) <= 0.0017 && (Math.abs(pd.getLatitude() - lat) <= 0.0014)) {
 							ImageButton d = b;
@@ -279,7 +277,6 @@ public class MainActivity extends Activity {
 							d.setMinimumHeight(150);
 							d.setMinimumWidth(150);
 							d.setVisibility(0);
-							d.setLayoutParams(params);
 							d.setOnClickListener(new OnClickListener() {
 								@Override
 								public void onClick(View v) {
@@ -292,11 +289,9 @@ public class MainActivity extends Activity {
 							Bitmap scaled = Bitmap.createScaledBitmap(pd.getOriginalPic(), 150, 150, true);
 			                c.setImageBitmap(scaled);
 							c.setVisibility(0);
-							c.setLayoutParams(params);
 							c.setOnClickListener(new OnClickListener() {
 								@Override
 								public void onClick(View v) {
-									layout.setBackgroundColor(Color.BLACK);
 									Bitmap scale = Bitmap.createScaledBitmap(pd.getOriginalPic(), screenWidth, screenHeight, true);
 									c.setImageBitmap(scale);
 								}
@@ -315,7 +310,6 @@ public class MainActivity extends Activity {
 				okay.setVisibility(4);
 				redo.setVisibility(4);
 				imageView.setImageBitmap(null);
-				takenPics.add(current);
 				current = null;
 				take.setVisibility(0);
 				view.setVisibility(0);
@@ -333,23 +327,15 @@ public class MainActivity extends Activity {
 	            startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
 			}
 		});
-		
-		viewAll.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				
-			}
-			
-		});
 	}
 
 	private class MyTask extends AsyncTask<String, Void, Bitmap> {
-		
+		/* Longitude at which the original photo was taken */
 		private double longitude;
+		/* Latitude at which the original photo was taken */
 		private double latitude;
+		/* Original picture taken */
 		private Bitmap originalPhoto;
-		private Bitmap apiPhoto;
 		
 		public MyTask(double lat, double lon, Bitmap ori) {
 			longitude = lon;
@@ -359,17 +345,18 @@ public class MainActivity extends Activity {
 
 		@Override
 		protected Bitmap doInBackground(String... arg0) {
-			apiPhoto = sendHTTPRequest(latitude, longitude);
-			return apiPhoto;
+			return sendHTTPRequest(latitude, longitude);
 		}
+		
 		@Override
 		public void onPreExecute() {
 		}
 		
 		@Override
 		public void onPostExecute(Bitmap photo) {
-			apiPics.add(photo);
-			picData.add(new PictureData(new Date(), latitude, longitude, originalPhoto, apiPhoto));
+			picData.add(new PictureData(new Date(), latitude, longitude, originalPhoto));
+			
+			// Set the picture on the current UI
 			imageView.setImageBitmap(photo);
 			imageView.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);

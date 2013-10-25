@@ -10,14 +10,12 @@ public class PictureData {
 	private double latitude;
 	private double longitude;
 	private Bitmap originalPic;
-	private Bitmap apiPic;
 	
-	public PictureData(Date t, double lat, double lon, Bitmap orig, Bitmap api) {
+	public PictureData(Date t, double lat, double lon, Bitmap orig) {
 		timestamp = t;
 		latitude = lat;
 		longitude = lon;
 		originalPic = orig;
-		apiPic = api;
 	}
 	
 	/**
@@ -46,13 +44,6 @@ public class PictureData {
 	 */
 	public Bitmap getOriginalPic() {
 		return originalPic;
-	}
-
-	/**
-	 * @return the apiPic
-	 */
-	public Bitmap getApiPic() {
-		return apiPic;
 	}
 	
 }
